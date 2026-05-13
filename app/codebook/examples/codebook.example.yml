@@ -1,0 +1,80 @@
+codebook:
+  name: "Example Conversation Codebook"
+  version: "0.1.0"
+  description: "Editable example only. Replace with project-specific themes."
+  theoretical_framework:
+    primary: "Braun & Clarke 2006 six-phase thematic analysis"
+    supporting:
+      - "Nowell et al. 2017 trustworthiness and audit trail"
+      - "Boyatzis 1998 thematic code development"
+
+framework_settings:
+  analysis_orientation: "codebook-supported thematic analysis"
+  coding_orientation: "deductive_or_inductive_user_defined"
+  theme_orientation: "semantic_or_latent_user_defined"
+  epistemological_position: "user_defined"
+  semantic_or_latent: "user_defined"
+  inductive_or_deductive: "user_defined"
+  require_audit_trail: true
+  require_memos: true
+  require_phase_completion: true
+  description: "Editable framework settings. The software structures workflow, not interpretation."
+
+features:
+  - name: "explanatory_depth"
+    description: "Degree to which the segment develops a reason, cause, mechanism, goal, context, or justification."
+    type: "ordinal"
+    allowed_values: ["low", "medium", "high"]
+    required: false
+    extraction_hint: "Look for elaboration, justification, decomposition, or explicit linking between claim and support."
+
+  - name: "speaker_positioning"
+    description: "How the speaker positions themselves in relation to the topic."
+    type: "categorical"
+    allowed_values: ["uncertain", "authoritative", "reflective", "defensive", "collaborative"]
+    required: false
+    extraction_hint: "Look for stance, hedging, certainty, ownership, or alignment."
+
+themes:
+  - name: "Example Theme"
+    description: "Replaceable example theme."
+    analytical_definition: "User must replace this with a project-specific analytical definition."
+    inclusion_criteria:
+      - "Include segments that match the user-defined analytical definition."
+    exclusion_criteria:
+      - "Exclude segments that only mention the topic without developing it analytically."
+    indicators:
+      - "because"
+      - "therefore"
+      - "in order to"
+    examples:
+      - "I changed the plan because the first approach was too slow."
+    counterexamples:
+      - "The plan changed."
+    codes:
+      - name: "Example Code"
+        description: "Replaceable example code."
+        analytical_definition: "User-editable definition."
+        inclusion_criteria:
+          - "User-editable inclusion criterion."
+        exclusion_criteria:
+          - "User-editable exclusion criterion."
+        indicators:
+          - "reason"
+          - "cause"
+          - "goal"
+        examples:
+          - "We used that route because it was safer."
+        counterexamples:
+          - "We used that route."
+
+memo_prompts:
+  familiarisation:
+    - "What repeated meanings, tensions, or patterns are visible in the conversation?"
+    - "What assumptions might the analyst be bringing to the interpretation?"
+  coding:
+    - "Why was this segment coded this way?"
+    - "What alternative code could have been applied?"
+  theme_review:
+    - "Does this theme have enough evidence across the dataset?"
+    - "Should this theme be split, merged, renamed, or rejected?"

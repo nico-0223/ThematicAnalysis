@@ -1,6 +1,17 @@
 # Conversation Thematic Analysis
 
-A production-oriented Python + SQL command-line application for configurable thematic analysis of conversations.
+A unified Python + SQL backend and React frontend for configurable thematic analysis of conversations.
+
+The repository is one coherent project with a clean boundary between layers:
+
+- `app/` contains backend application logic, persistence, validation, CLI commands, and the HTTP API.
+- `web/` contains the React/Vite frontend. It talks to the backend only through HTTP calls in `web/src/api/*`.
+- `tests/` contains backend tests.
+- `web/src/test/` contains frontend tests.
+- `data/` contains local demo inputs, SQLite data, and generated exports.
+- `docs/` contains methodological and database documentation.
+
+The backend remains the source of truth for analysis logic, data access, validation, persistence, audit trails, reports, and server-side operations. The frontend presents and controls those workflows through the API boundary; it must not import backend Python code, read backend files, or access the database directly.
 
 The application encodes methodological workflow and traceability. It does not infer the final meaning of a dataset, determine the user's research question, or hard-code substantive themes. The analyst edits the codebook, framework settings, features, indicators, examples, counterexamples, memo prompts, and scoring rules.
 
@@ -68,16 +79,108 @@ Edit:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .[test]
+make install-backend
+npm --prefix web install
 ```
+
+Or install both with:
+
+```bash
+make install
+```
+
+## Environment configuration
+
+Copy the backend example and adjust values for your machine:
+
+```bash
+cp .env.example .env
+```
+
+Backend variables:
+
+| Name | Default | Purpose |
+|---|---|---|
+| `DATABASE_URL` | `sqlite:///data/thematic_analysis.db` | SQLAlchemy database URL |
+| `APP_ENV` | `development` | Backend environment label |
+| `CORS_ORIGINS` | `http://localhost:5173` | Comma-separated frontend origins allowed to call the API |
+| `BACKEND_HOST` | `127.0.0.1` | Local backend bind host used by `make backend` |
+| `BACKEND_PORT` | `8000` | Local backend port used by `make backend` |
+
+Copy the frontend example when running Vite locally:
+
+```bash
+cp web/.env.example web/.env
+```
+
+Frontend variables:
+
+| Name | Default | Purpose |
+|---|---|---|
+| `VITE_API_BASE_URL` | `http://localhost:8000/api` | Backend API base URL |
+| `VITE_APP_NAME` | `Conversation Thematic Analysis` | App title shown in the UI |
+| `VITE_AUTH_MODE` | `disabled` | Reserved for a future auth layer |
+
+Do not commit real `.env` files or secrets.
+
+## Run the backend API locally
+
+```bash
+make backend
+```
+
+The API runs at `http://127.0.0.1:8000` by default. Health check:
+
+```bash
+curl http://127.0.0.1:8000/api/health
+```
+
+The CLI remains available for backend workflows and automation:
+
+```bash
+python -m app.cli.commands --help
+```
+
+## Run the frontend locally
+
+```bash
+npm --prefix web run dev
+# or
+make frontend
+```
+
+The Vite dev server runs at `http://localhost:5173` and uses `VITE_API_BASE_URL` for backend communication.
+
+## Run both locally
+
+```bash
+make dev
+```
+
+This starts the backend API and Vite frontend from one command. Stop both processes with `Ctrl+C`; if your shell leaves a background process running, stop it with your usual process manager.
 
 ## Run tests
 
 ```bash
-pytest
-# or
 make test
 ```
+
+Individual suites:
+
+```bash
+make test-backend
+make test-frontend
+```
+
+Backend tests run with `pytest`. Frontend tests run with Vitest through `npm --prefix web run test`.
+
+## Build for production
+
+```bash
+make build
+```
+
+This builds the frontend into `web/dist/`. The backend is a Python package served by `uvicorn app.api:app`.
 
 ## Run the demo locally
 
@@ -104,18 +207,37 @@ The demo report is written to:
 data/exports/demo_report.md
 ```
 
-## Docker demo
+## Docker deployment
 
 ```bash
 docker compose build
-docker compose run --rm app python -m app.cli.commands init-db
-docker compose run --rm app python -m app.cli.commands load-codebook --path app/codebook/examples/codebook.example.yml
-docker compose run --rm app python -m app.cli.commands ingest --path data/raw/demo_conversations.csv --format csv
-docker compose run --rm app python -m app.cli.commands preprocess --strategy turn
-docker compose run --rm app python -m app.cli.commands start-run --codebook-version 0.1.0 --run-name demo
-docker compose run --rm app python -m app.cli.commands analyze --run-id 1
-docker compose run --rm app python -m app.cli.commands export --run-id 1 --format markdown --out data/exports/demo_report.md
+docker compose up
 ```
+
+Services:
+
+- `api`: Python backend at `http://localhost:8000`.
+- `web`: Nginx-served frontend at `http://localhost:8080`, proxying `/api` to the backend service.
+
+You can still run CLI operations inside the backend container:
+
+```bash
+docker compose run --rm api python -m app.cli.commands init-db
+docker compose run --rm api python -m app.cli.commands load-codebook --path app/codebook/examples/codebook.example.yml
+docker compose run --rm api python -m app.cli.commands ingest --path data/raw/demo_conversations.csv --format csv
+docker compose run --rm api python -m app.cli.commands preprocess --strategy turn
+docker compose run --rm api python -m app.cli.commands start-run --codebook-version 0.1.0 --run-name demo
+docker compose run --rm api python -m app.cli.commands analyze --run-id 1
+docker compose run --rm api python -m app.cli.commands export --run-id 1 --format markdown --out data/exports/demo_report.md
+```
+
+For other platforms, deploy the backend as an ASGI app (`app.api:app`) and serve `web/dist/` with `VITE_API_BASE_URL` pointing at the deployed API.
+
+## Frontend-backend communication
+
+All browser-to-backend traffic goes through `web/src/api/client.ts`, which reads `VITE_API_BASE_URL`. Resource-specific API modules in `web/src/api/*.ts` define the endpoint paths. The backend exposes those routes from `app/api.py` under `/api`.
+
+Keep shared behavior on the backend. If a workflow needs new business logic, validation, data loading, reporting, or persistence, add it to the backend and expose it through the API. The frontend should only hold UI state, form state, display formatting, and API request orchestration.
 
 ## Inspect the SQLite database
 

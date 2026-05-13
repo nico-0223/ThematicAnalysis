@@ -1,0 +1,23 @@
+services:
+  api:
+    build: .
+    environment:
+      - DATABASE_URL=sqlite:///data/thematic_analysis.db
+      - APP_ENV=development
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:8080
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    command: uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.web
+      args:
+        VITE_API_BASE_URL: /api
+    depends_on:
+      - api
+    ports:
+      - "8080:80"

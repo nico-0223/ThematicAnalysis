@@ -1,0 +1,1 @@
+-- Optional seed file. The canonical demo seed path is app/codebook/examples/codebook.example.yml plus data/raw/demo_conversations.csv.

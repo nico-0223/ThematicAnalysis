@@ -1,0 +1,6 @@
+conversation_id,speaker_label,turn_index,text,timestamp,source
+conv-001,Participant A,1,"I changed the plan because the first approach was too slow.",2026-01-01T09:00:00,demo
+conv-001,Participant B,2,"That reason makes sense, and we should document the cause of the delay.",2026-01-01T09:01:00,demo
+conv-001,Participant A,3,"The next goal is to make the process clearer for everyone.",2026-01-01T09:02:00,demo
+conv-002,Participant C,1,"Maybe the issue is not the tool but the way we introduced it.",2026-01-02T10:00:00,demo
+conv-002,Participant D,2,"We used the checklist in order to avoid losing important details.",2026-01-02T10:01:00,demo
